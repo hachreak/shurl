@@ -97,9 +97,12 @@ init([Cfg]) ->
   {ok, config(Cfg)}.
 
 handle_call({register, Url}, _,
-            #{backend := {Backend, BCtx}, idx := {Idx, Count}}=Ctx) ->
+            #{backend := {Backend, BCtx},
+              idx := {Idx, Count},
+              prefix := Prefix}=Ctx) ->
   {ok, {BCtx2, Number}} = Backend:handle_count(BCtx),
-  ShortUrl = Idx:new(Number, Count),
+  Id = Idx:new(Number, Count),
+  ShortUrl = << Prefix/binary, Id/binary >>,
   call(Backend:handle_register(ShortUrl, Url, BCtx2), Ctx);
 handle_call({resolve, ShortUrl}, _, #{backend := {Backend, BCtx}}=Ctx) ->
   call(Backend:handle_resolve(ShortUrl, BCtx), Ctx);
@@ -127,7 +130,8 @@ config(#{backend := {Backend, Config}}=Cfg) ->
   Ctx = Backend:handle_init(Config),
   #{
     backend => {Backend, Ctx},
-    idx => maps:get(idx, Cfg, {shurl_key_hex, 3})
+    idx => maps:get(idx, Cfg, {shurl_key_hex, 3}),
+    prefix => maps:get(prefix, Cfg, <<"">>)
   }.
 
 call({ok, {BCtx, Value}}, #{backend := {Backend, _}}=Ctx) ->
