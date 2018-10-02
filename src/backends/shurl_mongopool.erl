@@ -73,7 +73,7 @@ handle_register(ShortUrl, Url, #{table := Table, pool := Pool}=Ctx) ->
 
 handle_resolve(ShortUrl, #{table := Table, pool := Pool}=Ctx) ->
   case mongopool_app:find_one(Pool, Table, #{<<"_id">> => ShortUrl}) of
-    #{<<"_id">> := ShortUrl}=Map -> {ok, {Ctx, Map}};
+    #{<<"_id">> := ShortUrl, <<"url">> := Url} -> {ok, {Ctx, Url}};
     _Rest -> {error, notfound}
   end.
 
