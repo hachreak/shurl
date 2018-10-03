@@ -22,7 +22,7 @@
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--behaviour(shurl).
+-behaviour(shurl_worker).
 
 -include_lib("stdlib/include/ms_transform.hrl").
 
@@ -38,7 +38,7 @@
 
 %% API
 
--type ctx() :: shurl:ctx().
+-type ctx() :: shurl_worker:ctx().
 
 -spec handle_init(map()) -> {ok, ctx()} | {error, term()}.
 
