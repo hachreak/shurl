@@ -33,6 +33,7 @@
   handle_init/1,
   handle_register/3,
   handle_resolve/2,
+  handle_revert/2,
   handle_update/3
 ]).
 
@@ -78,6 +79,14 @@ handle_resolve(ShortUrl, #{index := Index}=Ctx) ->
   case ets:lookup(Index, ShortUrl) of
     [] -> {error, not_found};
     [{_, Url}] -> {ok, {Ctx, Url}}
+  end.
+
+handle_revert(Url, #{index := Index}=Ctx) ->
+  case ets:match_object(Index, {'_', Url}) of
+    [] -> {error, not_found};
+    List ->
+      {ShortUrl, Url} = lists:last(List),
+      {ok, {Ctx, ShortUrl}}
   end.
 
 handle_update(ShortUrl, Url, #{index := Index}=Ctx) ->

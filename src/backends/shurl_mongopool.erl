@@ -33,6 +33,7 @@
   handle_init/1,
   handle_register/3,
   handle_resolve/2,
+  handle_revert/2,
   handle_update/3
 ]).
 
@@ -46,6 +47,9 @@
     {ok, {ctx(), binary()}} | {error, term()}.
 
 -spec handle_resolve(binary(), ctx()) ->
+    {ok, {ctx(), binary()}} | {error, term()}.
+
+-spec handle_revert(binary(), ctx()) ->
     {ok, {ctx(), binary()}} | {error, term()}.
 
 -spec handle_update(binary(), binary(), ctx()) ->
@@ -74,6 +78,12 @@ handle_register(ShortUrl, Url, #{table := Table, pool := Pool}=Ctx) ->
 handle_resolve(ShortUrl, #{table := Table, pool := Pool}=Ctx) ->
   case mongopool_app:find_one(Pool, Table, #{<<"_id">> => ShortUrl}) of
     #{<<"_id">> := ShortUrl, <<"url">> := Url} -> {ok, {Ctx, Url}};
+    _Rest -> {error, notfound}
+  end.
+
+handle_revert(Url, #{table := Table, pool := Pool}=Ctx) ->
+  case mongopool_app:find_one(Pool, Table, #{<<"url">> => Url}) of
+    #{<<"_id">> := ShortUrl, <<"url">> := Url} -> {ok, {Ctx, ShortUrl}};
     _Rest -> {error, notfound}
   end.
 

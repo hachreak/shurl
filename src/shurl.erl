@@ -28,6 +28,7 @@
   delete/2,
   register/2,
   resolve/2,
+  revert/2,
   update/3
 ]).
 
@@ -48,6 +49,11 @@ register(Url, PoolName) ->
 resolve(ShortUrl, PoolName) ->
   poolboy:transaction(PoolName, fun(Worker) ->
     gen_server:call(Worker, {resolve, ShortUrl})
+  end).
+
+revert(Url, PoolName) ->
+  poolboy:transaction(PoolName, fun(Worker) ->
+    gen_server:call(Worker, {revert, Url})
   end).
 
 update(ShortUrl, Url, PoolName) ->

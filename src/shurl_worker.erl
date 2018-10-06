@@ -46,6 +46,7 @@
   delete/2,
   register/2,
   resolve/2,
+  revert/2,
   update/3
 ]).
 
@@ -63,6 +64,9 @@
     {ok, {ctx(), binary()}} | {error, term()}.
 
 -callback handle_resolve(binary(), ctx()) ->
+    {ok, {ctx(), binary()}} | {error, term()}.
+
+-callback handle_revert(binary(), ctx()) ->
     {ok, {ctx(), binary()}} | {error, term()}.
 
 -callback handle_update(binary(), binary(), ctx()) ->
@@ -86,6 +90,9 @@ register(Url, Pid) ->
 
 resolve(ShortUrl, Pid) ->
   gen_server:call(Pid, {resolve, ShortUrl}).
+
+revert(Url, Pid) ->
+  gen_server:call(Pid, {revert, Url}).
 
 update(ShortUrl, Url, Pid) ->
   gen_server:cast(Pid, {update, ShortUrl, Url}).
@@ -113,6 +120,8 @@ handle_call({register, Url}, _,
   call(Backend:handle_register(ShortUrl, Url, BCtx2), Ctx);
 handle_call({resolve, ShortUrl}, _, #{backend := {Backend, BCtx}}=Ctx) ->
   call(Backend:handle_resolve(ShortUrl, BCtx), Ctx);
+handle_call({revert, Url}, _, #{backend := {Backend, BCtx}}=Ctx) ->
+  call(Backend:handle_revert(Url, BCtx), Ctx);
 handle_call(count, _, #{backend := {Backend, BCtx}}=Ctx) ->
   call(Backend:handle_count(BCtx), Ctx).
 
